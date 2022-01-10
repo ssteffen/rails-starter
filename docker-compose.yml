@@ -6,6 +6,10 @@ services:
       - ./tmp/db:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: rails-starter_dev_password
+  redis:
+    image: redis
+    expose:
+      - 6379
   web:
     build: .
     platform: linux/amd64
@@ -16,12 +20,25 @@ services:
       - "3000:3000"
     depends_on:
       - database
+      - redis
     environment:
       RAILS_ENV: development
       DATABASE_NAME: rails-starter_development
       DATABASE_USER: postgres
       DATABASE_PASSWORD: rails-starter_dev_password
       DATABASE_HOST: database
+      REDIS_URL_SIDEKIQ: redis://redis:6379/1
+  sidekiq:
+    depends_on:
+      - 'db'
+      - 'redis'
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails-starter:cached
+      - '/rails-starter/tmp' # don't mount tmp directory
+    environment:
+      REDIS_URL_SIDEKIQ: redis://redis:6379/1
 
 volumes:
   db_data:
