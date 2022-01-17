@@ -45,3 +45,4 @@ RUN bundle check || bundle install
 COPY . ./
 
 # ENTRYPOINT ["./entrypoints/docker-entrypoint.sh"]
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
